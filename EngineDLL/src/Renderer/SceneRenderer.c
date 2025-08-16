@@ -1,6 +1,16 @@
 #include "pch.h"
 #include "Renderer/SceneRenderer.h"
 
+#pragma region INTERNAL
+typedef struct _SceneRenderer
+{
+    GfxRenderTarget* pHDRRenderTarget;
+} _SceneRenderer;
+#pragma endregion
+
+bool SceneRenderer_Initialize(GfxHandle handle, ISceneRenderer** ppSceneRenderer);
+void SceneRenderer_Shutdown(ISceneRenderer** ppSceneRenderer);
+
 void SceneRenderer_DrawScene(GfxHandle handle)
 {
     DO_ASSERT_MSG(handle, "Graphics handle is null.");

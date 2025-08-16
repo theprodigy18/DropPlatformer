@@ -94,6 +94,7 @@ typedef double f64;
 
 #include <d3d11.h>
 #include <dxgi.h>
+#include <d3dcompiler.h>
 
 #define DO_RELEASE(x) x->lpVtbl->Release(x)
 #define DO_SAFE_RELEASE(x) \

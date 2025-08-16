@@ -129,3 +129,78 @@ void Graphics_DestroyGraphics(GfxHandle* pHandle)
 
     *pHandle = NULL;
 }
+
+bool Graphics_CreateHDRRenderTarget(const GfxHandle handle, u32 width, u32 height, GfxRenderTarget* pRenderTarget)
+{
+    DO_ASSERT_MSG(handle, "Graphics handle is null.");
+    DO_ASSERT_MSG(pRenderTarget, "Pointer to render target is null.");
+
+    D3D11_TEXTURE2D_DESC texDesc = {
+        .SampleDesc.Count   = 1,
+        .SampleDesc.Quality = 0,
+        .ArraySize          = 1,
+        .BindFlags          = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+        .CPUAccessFlags     = 0,
+        .MiscFlags          = 0,
+        .Format             = DXGI_FORMAT_R16G16B16A16_FLOAT,
+        .Width              = width,
+        .Height             = height,
+        .Usage              = D3D11_USAGE_DEFAULT,
+        .MipLevels          = 1};
+
+    ID3D11Texture2D* pTexture = NULL;
+
+    HRESULT hr = handle->pDevice->lpVtbl->CreateTexture2D(handle->pDevice, &texDesc, NULL, &pTexture);
+    if (FAILED(hr) || !pTexture)
+    {
+        DO_ASSERT_MSG(false, "Failed to create texture.");
+        return false;
+    }
+
+    ID3D11RenderTargetView* pRTV = NULL;
+
+    hr = handle->pDevice->lpVtbl->CreateRenderTargetView(handle->pDevice, (ID3D11Resource*) pTexture, NULL, &pRTV);
+    if (FAILED(hr) || !pRTV)
+    {
+        DO_ASSERT_MSG(false, "Failed to create render target view.");
+        DO_RELEASE(pTexture);
+        return false;
+    }
+
+    ID3D11ShaderResourceView* pSRV = NULL;
+
+    hr = handle->pDevice->lpVtbl->CreateShaderResourceView(handle->pDevice, (ID3D11Resource*) pTexture, NULL, &pSRV);
+    if (FAILED(hr) || !pSRV)
+    {
+        DO_ASSERT_MSG(false, "Failed to create shader resource view.");
+        DO_RELEASE(pRTV);
+        DO_RELEASE(pTexture);
+        return false;
+    }
+
+    pRenderTarget->pRTV     = pRTV;
+    pRenderTarget->pSRV     = pSRV;
+    pRenderTarget->pTexture = pTexture;
+    pRenderTarget->width    = width;
+    pRenderTarget->height   = height;
+
+    return true;
+}
+
+void Graphics_DestroyRenderTarget(GfxRenderTarget* pRenderTarget)
+{
+    DO_ASSERT_MSG(pRenderTarget, "Pointer to render target is null.");
+
+    if (pRenderTarget)
+    {
+        DO_SAFE_RELEASE(pRenderTarget->pRTV);
+        DO_SAFE_RELEASE(pRenderTarget->pSRV);
+        DO_SAFE_RELEASE(pRenderTarget->pTexture);
+
+        pRenderTarget->pRTV     = NULL;
+        pRenderTarget->pSRV     = NULL;
+        pRenderTarget->pTexture = NULL;
+        pRenderTarget->width    = 0;
+        pRenderTarget->height   = 0;
+    }
+}

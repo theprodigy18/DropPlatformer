@@ -1,4 +1,4 @@
--- require("ecc/ecc")
+require("ecc/ecc")
 -- ===============================
 -- WORKSPACE(DropPlatformer)
 -- ===============================
@@ -54,7 +54,7 @@ pchsource "%{prj.location}/src/pch.c"
 files {"%{prj.location}/include/**.h", "%{prj.location}/src/**.c"}
 includedirs {"%{prj.location}", "%{prj.location}/include"}
 
-links {"user32", "d3d11", "dxgi", "dxguid"}
+links {"user32", "d3d11", "dxgi", "dxguid", "d3dcompiler"}
 
 defines {"DO_DLL_EXPORTS"}
 
