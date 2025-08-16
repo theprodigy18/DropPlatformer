@@ -14,26 +14,26 @@ static LRESULT CALLBACK InternalWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
     {
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
-        DROP_SetKeyState((u32) wParam, true);
+        Input_SetKeyState((u32) wParam, true);
         break;
     case WM_KEYUP:
     case WM_SYSKEYUP:
-        DROP_SetKeyState((u32) wParam, false);
+        Input_SetKeyState((u32) wParam, false);
         break;
     case WM_LBUTTONDOWN:
-        DROP_SetMouseButton(0, true);
+        Input_SetMouseButton(0, true);
         break;
     case WM_LBUTTONUP:
-        DROP_SetMouseButton(0, false);
+        Input_SetMouseButton(0, false);
         break;
     case WM_RBUTTONDOWN:
-        DROP_SetMouseButton(1, true);
+        Input_SetMouseButton(1, true);
         break;
     case WM_RBUTTONUP:
-        DROP_SetMouseButton(1, false);
+        Input_SetMouseButton(1, false);
         break;
     case WM_MOUSEMOVE:
-        DROP_SetMousePos(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        Input_SetMousePos(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         break;
     case WM_CLOSE:
     {
@@ -74,7 +74,7 @@ static const wchar_t* WND_CLASS_NAME = L"DROP-2D-Engine";
 static HINSTANCE s_hInstance = NULL;
 #pragma endregion
 
-bool DROP_CreateWindow(const WndInitProps* pProps, WndHandle* pHandle)
+bool Window_CreateWindow(const WndInitProps* pProps, WndHandle* pHandle)
 {
     DO_ASSERT_MSG(pProps, "Pointer to the properties is null.");
     DO_ASSERT_MSG(pHandle, "Pointer to the handle is null.");
@@ -114,7 +114,7 @@ bool DROP_CreateWindow(const WndInitProps* pProps, WndHandle* pHandle)
     u32 width  = rc.right - rc.left;
     u32 height = rc.bottom - rc.top;
 
-    WndCallback* pCallback = (WndCallback*) DROP_Allocate(DO_PERSISTENT, sizeof(WndCallback));
+    WndCallback* pCallback = (WndCallback*) ArenaAllocator_Allocate(DO_PERSISTENT, sizeof(WndCallback));
     if (!pCallback)
     {
         DO_ASSERT_MSG(false, "Failed to allocate memory for window callback struct.");
@@ -132,7 +132,7 @@ bool DROP_CreateWindow(const WndInitProps* pProps, WndHandle* pHandle)
         return false;
     }
 
-    WndHandle handle = (WndHandle) DROP_Allocate(DO_PERSISTENT, sizeof(_WndHandle));
+    WndHandle handle = (WndHandle) ArenaAllocator_Allocate(DO_PERSISTENT, sizeof(_WndHandle));
     if (!handle)
     {
         DO_ASSERT_MSG(false, "Failed to allocate memory for window handle.");
@@ -140,14 +140,16 @@ bool DROP_CreateWindow(const WndInitProps* pProps, WndHandle* pHandle)
         return false;
     }
 
-    handle->hwnd = hwnd;
+    handle->hwnd   = hwnd;
+    handle->width  = pProps->width;
+    handle->height = pProps->height;
 
     *pHandle = handle;
 
     return true;
 }
 
-void DROP_DestroyWindow(WndHandle* pHandle)
+void Window_DestroyWindow(WndHandle* pHandle)
 {
     DO_ASSERT_MSG(pHandle && *pHandle, "Pointer to the handle or the handle itself is null.");
     WndHandle handle = *pHandle;
@@ -166,7 +168,7 @@ void DROP_DestroyWindow(WndHandle* pHandle)
     s_hInstance = NULL;
 }
 
-void DROP_PollEvents()
+void Window_PollEvents()
 {
     MSG msg;
     while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))

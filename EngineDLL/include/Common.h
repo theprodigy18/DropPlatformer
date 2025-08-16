@@ -92,5 +92,9 @@ typedef double f64;
 #define NOMINMAX
 #include <Windows.h>
 
-// #define RELEASE(x) x->lpVtbl->Release(x)
-// #define SAFE_RELEASE(x) if (x) x->lpVtbl->Release(x)
+#include <d3d11.h>
+#include <dxgi.h>
+
+#define DO_RELEASE(x) x->lpVtbl->Release(x)
+#define DO_SAFE_RELEASE(x) \
+    if (x) x->lpVtbl->Release(x)

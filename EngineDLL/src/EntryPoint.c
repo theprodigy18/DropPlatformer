@@ -1,21 +1,10 @@
 #include "pch.h"
 #include "EntryPoint.h"
 
-#include "Platform/Window.h"
-#include "Platform/Input.h"
+#include "Renderer/Renderer.h"
 
 static bool InitializeGlobalMemory(u64 persistentSize, u64 transientSize);
 static void CleanupGlobalMemory();
-
-static bool s_isRunning = true;
-
-static bool OnClose()
-{
-    PostQuitMessage(0);
-    s_isRunning = false;
-
-    return true;
-}
 
 int EntryPoint()
 {
@@ -25,29 +14,26 @@ int EntryPoint()
         return 1;
     }
 
-    WndInitProps wndProps = {
-        .title    = L"2D Drop Engine",
-        .width    = 1280,
-        .height   = 720,
-        .callback = {
-            .OnClose = OnClose}};
-
-    WndHandle handle = NULL;
-
-    DROP_CreateWindow(&wndProps, &handle);
-
-    ShowWindow(handle->hwnd, SW_SHOW);
-
-    while (s_isRunning)
+    IRenderer* pRenderer = NULL;
+    if (!Renderer_Initialize(L"Drop Platformer", 1280, 720, &pRenderer))
     {
-        DROP_UpdatePrevState();
-
-        DROP_PollEvents();
+        DO_ASSERT_MSG(false, "Failed to initialize renderer.");
+        CleanupGlobalMemory();
+        return 1;
     }
 
-    ShowWindow(handle->hwnd, SW_HIDE);
+    while (Renderer_ProcessFrame(pRenderer))
+    {
+        Renderer_BeginFrame(pRenderer);
+        Renderer_DrawFrame(pRenderer);
+        Renderer_EndFrame(pRenderer);
+    }
 
+    Renderer_Shutdown(&pRenderer);
     CleanupGlobalMemory();
+
+    DO_PRINT_LEAKS();
+    DO_CLEANUP();
     return 0;
 }
 
@@ -60,8 +46,8 @@ static bool InitializeGlobalMemory(u64 persistentSize, u64 transientSize)
         return false;
     }
 
-    if (!DROP_CreateArena(DO_PERSISTENT, persistentSize) ||
-        !DROP_CreateArena(DO_TRANSIENT, transientSize))
+    if (!ArenaAllocator_CreateArena(DO_PERSISTENT, persistentSize) ||
+        !ArenaAllocator_CreateArena(DO_TRANSIENT, transientSize))
     {
         DO_ERROR("Failed to create persistent or transient storage.");
         DO_FREE(g_memory);
@@ -72,6 +58,8 @@ static bool InitializeGlobalMemory(u64 persistentSize, u64 transientSize)
 }
 static void CleanupGlobalMemory()
 {
+    DO_FREE(g_memory->transientStorage.memory);
+    DO_FREE(g_memory->persistentStorage.memory);
     DO_FREE(g_memory);
     g_memory = NULL;
 }

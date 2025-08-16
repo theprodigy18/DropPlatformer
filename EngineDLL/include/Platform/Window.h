@@ -3,6 +3,8 @@
 typedef struct _WndHandle
 {
     HWND hwnd;
+
+    u32 width, height;
 } _WndHandle;
 
 typedef _WndHandle* WndHandle;
@@ -14,15 +16,15 @@ typedef struct _WndCallback
 
 typedef struct _WndInitProps
 {
-    wchar_t*    title;
-    u32         width;
-    u32         height;
-    WndCallback callback;
+    const wchar_t* title;
+    u32            width;
+    u32            height;
+    WndCallback    callback;
 } WndInitProps;
 
 // Create a window.
-bool DROP_CreateWindow(const WndInitProps* pProps, WndHandle* pHandle);
+bool Window_CreateWindow(const WndInitProps* pProps, WndHandle* pHandle);
 // Destroy a window.
-void DROP_DestroyWindow(WndHandle* pHandle);
+void Window_DestroyWindow(WndHandle* pHandle);
 // Handle message loop.
-void DROP_PollEvents();
+void Window_PollEvents();

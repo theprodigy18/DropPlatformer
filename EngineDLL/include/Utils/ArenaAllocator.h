@@ -17,7 +17,7 @@ typedef struct _Memory* Memory;
 
 extern Memory g_memory;
 
-static inline bool DROP_CreateArena(ArenaAllocator* pArena, u64 size)
+static inline bool ArenaAllocator_CreateArena(ArenaAllocator* pArena, u64 size)
 {
     char* memory = (char*) DO_ALLOC(char, size);
     if (!memory)
@@ -35,7 +35,7 @@ static inline bool DROP_CreateArena(ArenaAllocator* pArena, u64 size)
     return true;
 }
 
-static inline char* DROP_Allocate(ArenaAllocator* pArena, u64 size)
+static inline char* ArenaAllocator_Allocate(ArenaAllocator* pArena, u64 size)
 {
     u64 allignedSize = (size + 15) & ~15; // Alligned to 16-bits.
 
@@ -45,4 +45,9 @@ static inline char* DROP_Allocate(ArenaAllocator* pArena, u64 size)
     pArena->used += allignedSize;
 
     return memory;
+}
+
+static inline void ArenaAllocator_ClearArena(ArenaAllocator* pArena)
+{
+    pArena->used = 0;
 }

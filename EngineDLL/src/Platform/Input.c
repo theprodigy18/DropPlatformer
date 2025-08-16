@@ -28,7 +28,7 @@ static MouseState s_mouseState;
 static MousePos   s_mousePos;
 #pragma endregion
 
-void DROP_UpdatePrevState()
+void Input_UpdatePrevState()
 {
     for (u32 i = 0; i < KEY_COUNT; ++i)
     {
@@ -41,48 +41,48 @@ void DROP_UpdatePrevState()
     s_mousePos.prevPos = s_mousePos.pos;
 }
 
-void DROP_SetKeyState(u32 key, bool pressed)
+void Input_SetKeyState(u32 key, bool pressed)
 {
     s_inputState.keys[key] = pressed;
 }
 
-void DROP_SetMouseButton(u32 key, bool pressed)
+void Input_SetMouseButton(u32 key, bool pressed)
 {
     s_mouseState.buttons[key] = pressed;
 }
 
-void DROP_SetMousePos(i32 x, i32 y)
+void Input_SetMousePos(i32 x, i32 y)
 {
     s_mousePos.pos.x = x;
     s_mousePos.pos.y = y;
 }
 
-bool DROP_IsKeyPressed(u32 key)
+bool Input_IsKeyPressed(u32 key)
 {
     return s_inputState.keys[key] && !s_inputState.prevKeys[key];
 }
 
-bool DROP_IsKeyReleased(u32 key)
+bool Input_IsKeyReleased(u32 key)
 {
     return !s_inputState.keys[key] && s_inputState.prevKeys[key];
 }
 
-bool DROP_IsKeyHeld(u32 key)
+bool Input_IsKeyHeld(u32 key)
 {
     return s_inputState.keys[key];
 }
 
-bool DROP_IsMouseClicked(u32 button)
+bool Input_IsMouseClicked(u32 button)
 {
     return s_mouseState.buttons[button] && !s_mouseState.prevButtons[button];
 }
 
-bool DROP_IsMouseReleased(u32 button)
+bool Input_IsMouseReleased(u32 button)
 {
     return !s_mouseState.buttons[button] && s_mouseState.prevButtons[button];
 }
 
-bool DROP_IsMouseHeld(u32 button)
+bool Input_IsMouseHeld(u32 button)
 {
     return s_mouseState.buttons[button];
 }

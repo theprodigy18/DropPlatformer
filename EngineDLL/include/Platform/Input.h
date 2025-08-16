@@ -8,16 +8,16 @@ typedef struct _Point
     i32 x, y;
 } Point;
 
-void DROP_UpdatePrevState();
+void Input_UpdatePrevState();
 
-void DROP_SetKeyState(u32 key, bool pressed);
-void DROP_SetMouseButton(u32 key, bool pressed);
-void DROP_SetMousePos(i32 x, i32 y);
+void Input_SetKeyState(u32 key, bool pressed);
+void Input_SetMouseButton(u32 key, bool pressed);
+void Input_SetMousePos(i32 x, i32 y);
 
-bool DROP_IsKeyPressed(u32 key);
-bool DROP_IsKeyReleased(u32 key);
-bool DROP_IsKeyHeld(u32 key);
+bool Input_IsKeyPressed(u32 key);
+bool Input_IsKeyReleased(u32 key);
+bool Input_IsKeyHeld(u32 key);
 
-bool DROP_IsMouseClicked(u32 button);
-bool DROP_IsMouseReleased(u32 button);
-bool DROP_IsMouseHeld(u32 button);
+bool Input_IsMouseClicked(u32 button);
+bool Input_IsMouseReleased(u32 button);
+bool Input_IsMouseHeld(u32 button);
