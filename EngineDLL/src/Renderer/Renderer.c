@@ -23,6 +23,10 @@ typedef struct _Renderer
     WndHandle wndHandle;
     GfxHandle gfxHandle;
 
+    D3D11_VIEWPORT viewports[4]; // Full, Half, Quarter, Eighth.
+
+    ISceneRenderer* pSceneRenderer;
+
     bool isRunning;
 } _Renderer;
 
@@ -53,6 +57,34 @@ static bool InitializeCore(const wchar_t* title, u32 width, u32 height, IRendere
         return false;
     }
 
+    pRenderer->viewports[0].TopLeftX = 0.0f;
+    pRenderer->viewports[0].TopLeftY = 0.0f;
+    pRenderer->viewports[0].Width    = (f32) width;
+    pRenderer->viewports[0].Height   = (f32) height;
+    pRenderer->viewports[0].MinDepth = 0.0f;
+    pRenderer->viewports[0].MaxDepth = 1.0f;
+
+    pRenderer->viewports[1].TopLeftX = 0.0f;
+    pRenderer->viewports[1].TopLeftY = 0.0f;
+    pRenderer->viewports[1].Width    = (f32) width / 2.0f;
+    pRenderer->viewports[1].Height   = (f32) height / 2.0f;
+    pRenderer->viewports[1].MinDepth = 0.0f;
+    pRenderer->viewports[1].MaxDepth = 1.0f;
+
+    pRenderer->viewports[2].TopLeftX = 0.0f;
+    pRenderer->viewports[2].TopLeftY = 0.0f;
+    pRenderer->viewports[2].Width    = (f32) width / 4.0f;
+    pRenderer->viewports[2].Height   = (f32) height / 4.0f;
+    pRenderer->viewports[2].MinDepth = 0.0f;
+    pRenderer->viewports[2].MaxDepth = 1.0f;
+
+    pRenderer->viewports[3].TopLeftX = 0.0f;
+    pRenderer->viewports[3].TopLeftY = 0.0f;
+    pRenderer->viewports[3].Width    = (f32) width / 8.0f;
+    pRenderer->viewports[3].Height   = (f32) height / 8.0f;
+    pRenderer->viewports[3].MinDepth = 0.0f;
+    pRenderer->viewports[3].MaxDepth = 1.0f;
+
     return true;
 }
 static void ShutdownCore(IRenderer* pRenderer)
@@ -81,6 +113,15 @@ bool Renderer_Initialize(const wchar_t* title, u32 width, u32 height, IRenderer*
         return false;
     }
 
+    if (!SceneRenderer_Initialize(
+            pRenderer->gfxHandle, pRenderer->wndHandle->width, pRenderer->wndHandle->height,
+            &pRenderer->pSceneRenderer))
+    {
+        DO_ERROR("Failed to initialize scene renderer.");
+        ShutdownCore(pRenderer);
+        return false;
+    }
+
     pRenderer->isRunning = true;
 
     ShowWindow(pRenderer->wndHandle->hwnd, SW_SHOW);
@@ -96,6 +137,7 @@ void Renderer_Shutdown(IRenderer** ppRenderer)
 
     ShowWindow(pRenderer->wndHandle->hwnd, SW_HIDE);
 
+    SceneRenderer_Shutdown(&pRenderer->pSceneRenderer);
     ShutdownCore(pRenderer);
 
     *ppRenderer = NULL;
@@ -121,7 +163,8 @@ void Renderer_DrawFrame(IRenderer* pRenderer)
 {
     DO_ASSERT_MSG(pRenderer, "Pointer to renderer is null");
 
-    SceneRenderer_DrawScene(pRenderer->gfxHandle);
+    SceneRenderer_DrawScene(
+        pRenderer->gfxHandle, pRenderer->pSceneRenderer, &pRenderer->viewports[0]);
 }
 
 void Renderer_EndFrame(IRenderer* pRenderer)
